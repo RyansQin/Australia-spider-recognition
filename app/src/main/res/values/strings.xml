@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">spider-recognition</string>
+    <string name="encyclopedia_menu">Encyclopedia</string>
+    <string name="identifier_menu">Identifier</string>
+    <string name="me_menu">Me</string>
+    <string name="strCamera">Camera</string>
+    <string name="strGallery">Gallery</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
