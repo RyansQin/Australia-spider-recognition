@@ -116,6 +116,12 @@ public class main_fragment extends Fragment {
                             startActivity(intent);
                             break;
                         }
+                        case "Recluse Spider":{
+                            Intent intent = new Intent(getActivity(),recluse_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+
 
                     }
 //                    if (au_spider.getSpider_name().equals("Australian Redback Spider")){
@@ -142,6 +148,7 @@ public class main_fragment extends Fragment {
         spiders.add(new spider(R.drawable.st_andrews_cross_spider, "St Andrews Cross Spider"));
         spiders.add(new spider(R.drawable.spider_funnel_web, "Sydney Funnel Web Spider"));
         spiders.add(new spider(R.drawable.white_tailed_spiders, "White Tailed Spider"));
+        spiders.add(new spider(R.drawable.recluse_spider_entry, "Recluse Spider"));
         return spiders;
     }
 }
