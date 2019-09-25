@@ -10,5 +10,24 @@
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="@string/image_history"
+        android:layout_marginTop = "12mm"
+        android:textSize="30sp" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/identification_history"
+        android:layout_marginTop = "15mm"
+        android:textSize="30sp" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/uploaded_position"
+        android:layout_marginTop = "15mm"
+        android:textSize="30sp" />
+
 </LinearLayout>

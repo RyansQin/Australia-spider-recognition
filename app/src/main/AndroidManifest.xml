@@ -9,7 +9,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".redback_spider"></activity>
+        <activity android:name=".white_tailed_spiders"></activity>
+        <activity android:name=".spider_funnel_web" />
+        <activity android:name=".st_andrews_cross_spider" />
+        <activity android:name=".red_headed_mouse_spider" />
+        <activity android:name=".huntsman_spider" />
+        <activity android:name=".garden_orb_weaver_spider" />
+        <activity android:name=".daddy_long_legs_spider" />
+        <activity android:name=".tarantula_spider" />
+        <activity android:name=".redback_spider" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
