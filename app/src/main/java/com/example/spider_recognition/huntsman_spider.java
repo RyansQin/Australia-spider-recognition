@@ -10,16 +10,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import android.text.Html;
 
-public class redback_spider extends AppCompatActivity {
+public class huntsman_spider extends AppCompatActivity {
+
     @BindView(R.id.textView)
     TextView text;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_redback_spider);
+        setContentView(R.layout.activity_huntsman_spider);
         TextView mTextView = (TextView) findViewById(R.id.editText3);
-        mTextView.setText(Html.fromHtml(getResources().getString(R.string.redback_hazard_level)));
+        mTextView.setText(Html.fromHtml(getResources().getString(R.string.huntsman_level)));
         ButterKnife.bind(this);
 
         Intent intent = getIntent();

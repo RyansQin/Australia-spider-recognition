@@ -70,13 +70,67 @@ public class main_fragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     spider au_spider = (spider)adapterView.getItemAtPosition(i);
-                    if (au_spider.getSpider_name().equals("Australian Redback Spider")){
-                        Intent intent = new Intent(getActivity(),redback_spider.class);
-                        startActivity(intent);
+                    switch (au_spider.getSpider_name()){
+                        case "Australian Redback Spider":{
+                            Intent intent = new Intent(getActivity(),redback_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "Australian Tarantula Spider":{
+                            Intent intent = new Intent(getActivity(),tarantula_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "Daddy Long Legs Spider":{
+                            Intent intent = new Intent(getActivity(),daddy_long_legs_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "Garden Orb Weaver Spider":{
+                            Intent intent = new Intent(getActivity(),garden_orb_weaver_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "Australian Huntsman Spider":{
+                            Intent intent = new Intent(getActivity(),huntsman_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "Red Headed Mouse Spider":{
+                            Intent intent = new Intent(getActivity(),red_headed_mouse_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "St Andrews Cross Spider":{
+                            Intent intent = new Intent(getActivity(),st_andrews_cross_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "Sydney Funnel Web Spider":{
+                            Intent intent = new Intent(getActivity(),spider_funnel_web.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "White Tailed Spider":{
+                            Intent intent = new Intent(getActivity(),white_tailed_spiders.class);
+                            startActivity(intent);
+                            break;
+                        }
+                        case "Recluse Spider":{
+                            Intent intent = new Intent(getActivity(),recluse_spider.class);
+                            startActivity(intent);
+                            break;
+                        }
+
+
                     }
-                    else{
-                        Toast.makeText(getContext(), au_spider.getSpider_name(), Toast.LENGTH_SHORT).show();
-                    }
+//                    if (au_spider.getSpider_name().equals("Australian Redback Spider")){
+//                        Intent intent = new Intent(getActivity(),redback_spider.class);
+//                        startActivity(intent);
+//                    }
+//                    else{
+//                        Toast.makeText(getContext(), au_spider.getSpider_name(), Toast.LENGTH_SHORT).show();
+//                    }
 
                 }
             });
@@ -94,6 +148,7 @@ public class main_fragment extends Fragment {
         spiders.add(new spider(R.drawable.st_andrews_cross_spider, "St Andrews Cross Spider"));
         spiders.add(new spider(R.drawable.spider_funnel_web, "Sydney Funnel Web Spider"));
         spiders.add(new spider(R.drawable.white_tailed_spiders, "White Tailed Spider"));
+        spiders.add(new spider(R.drawable.recluse_spider_entry, "Recluse Spider"));
         return spiders;
     }
 }
