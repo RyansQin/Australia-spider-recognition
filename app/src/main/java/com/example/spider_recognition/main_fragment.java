@@ -70,60 +70,11 @@ public class main_fragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     spider au_spider = (spider)adapterView.getItemAtPosition(i);
-                    switch (au_spider.getSpider_name()){
-                        case "Australian Redback Spider":{
-                            Intent intent = new Intent(getActivity(),redback_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "Australian Tarantula Spider":{
-                            Intent intent = new Intent(getActivity(),tarantula_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "Daddy Long Legs Spider":{
-                            Intent intent = new Intent(getActivity(),daddy_long_legs_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "Garden Orb Weaver Spider":{
-                            Intent intent = new Intent(getActivity(),garden_orb_weaver_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "Australian Huntsman Spider":{
-                            Intent intent = new Intent(getActivity(),huntsman_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "Red Headed Mouse Spider":{
-                            Intent intent = new Intent(getActivity(),red_headed_mouse_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "St Andrews Cross Spider":{
-                            Intent intent = new Intent(getActivity(),st_andrews_cross_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "Sydney Funnel Web Spider":{
-                            Intent intent = new Intent(getActivity(),spider_funnel_web.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "White Tailed Spider":{
-                            Intent intent = new Intent(getActivity(),white_tailed_spiders.class);
-                            startActivity(intent);
-                            break;
-                        }
-                        case "Recluse Spider":{
-                            Intent intent = new Intent(getActivity(),recluse_spider.class);
-                            startActivity(intent);
-                            break;
-                        }
+                    String type = au_spider.getSpider_name();
+                    Intent intent = new Intent(getActivity(),encyclopedia_spider.class);
+                    intent.putExtra("Type", type);
+                    startActivity(intent);
 
-
-                    }
 //                    if (au_spider.getSpider_name().equals("Australian Redback Spider")){
 //                        Intent intent = new Intent(getActivity(),redback_spider.class);
 //                        startActivity(intent);
