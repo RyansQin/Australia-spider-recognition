@@ -2,21 +2,34 @@ package com.example.spider_recognition;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,7 +43,9 @@ public class main_fragment extends Fragment {
     public static String fragment_type = "type";
     private int default_fragment = R.layout.identifier_fragment;
     private ListView listView;
-
+    private Button camerabtn;
+    private Button gallerybtn;
+    private static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
 
 
     public main_fragment() {
@@ -75,18 +90,72 @@ public class main_fragment extends Fragment {
                     intent.putExtra("Type", type);
                     startActivity(intent);
 
-//                    if (au_spider.getSpider_name().equals("Australian Redback Spider")){
-//                        Intent intent = new Intent(getActivity(),redback_spider.class);
-//                        startActivity(intent);
-//                    }
-//                    else{
-//                        Toast.makeText(getContext(), au_spider.getSpider_name(), Toast.LENGTH_SHORT).show();
-//                    }
-
+                }
+            });
+        }
+        if (this.default_fragment == R.layout.identifier_fragment) {
+            camerabtn = view.findViewById(R.id.btnCamera);
+            gallerybtn = view.findViewById(R.id.btnGallery);
+            gallerybtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("ButtonClick", "button click");
+                    String url = "http://35.244.112.203:5000/spiders";
+                    SendMessageToServer(url);
                 }
             });
         }
     }
+
+    private void SendMessageToServer(String url) {
+
+        OkHttpClient client = new OkHttpClient();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        try {
+            // Read BitMap by file path.
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.garden_orb_weaver_spider);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        }catch(Exception e){
+            Log.d("Image", "Image path error");
+            return;
+        }
+        byte[] byteArray = stream.toByteArray();
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+//                .addFormDataPart("user", "helloworld")
+                .addFormDataPart("image", "redtest.jpg",
+                        RequestBody.create(MEDIA_TYPE_JPG, byteArray))
+                .build();
+
+        Request request = new Request.Builder().url(url).post(requestBody).build();
+
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d("Server", "Server connection failure");
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.d("Server", "Server return failure");
+                }
+                else{
+                    final String res = response.body().string();
+                    Log.d("Server", res);
+                }
+
+            }
+        });
+
+    }
+
+
+
 
     private ArrayList<spider>getSpiders(){
         ArrayList<spider> spiders = new ArrayList<>();
