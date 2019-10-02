@@ -70,8 +70,6 @@ public class main_fragment extends Fragment {
 
     private Uri imageUri;
     private final int CAMERA_REQUEST = 2;
-//    database helper
-    private MyDatabaseHelper dbHelper;
     private String res = "null";
     private ListView history_view;
     private ArrayList<History> histories = new ArrayList<>();
@@ -85,8 +83,6 @@ public class main_fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        dbHelper = new MyDatabaseHelper(getActivity(), "SpiderHistory.db", null, 2);
-        dbHelper.getWritableDatabase();
         if (this.getArguments() != null)
             this.default_fragment = getArguments().getInt(fragment_type);
 
@@ -154,98 +150,36 @@ public class main_fragment extends Fragment {
                 }
             });
         }
-        if (this.default_fragment == R.layout.me_fragment){
-            history_view = view.findViewById(R.id.history_view);
-            if (histories.size() > 1){
-                Log.d("history", "not null");
-                HistoryAdapter historyAdapter = new HistoryAdapter(getActivity(), R.layout.history_list, histories);
-                history_view.setAdapter(historyAdapter);
-            }
-            else{
-                Log.d("history", "null");
-            }
-        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_UPLOAD && null != data){
             Uri selectedImg = data.getData();
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-            Cursor cursor = getActivity().getContentResolver().query(selectedImg, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            cursor.close();
+//            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+//            Cursor cursor = getActivity().getContentResolver().query(selectedImg, filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+//            String picturePath = cursor.getString(columnIndex);
+//            cursor.close();
             String url = "http://35.244.112.203:5000/spiders";
-            String returnResult = SendMessageToServer(url, picturePath);
+            String returnResult = SendMessageToServer(url, selectedImg);
             if (returnResult == "multiple"){
                 Log.d("ImageDetection", "Multiple objects");
             }
             else if (returnResult == "null"){
                 Log.d("ImageDetection", "Server return failure");
             }
-            else{
-                AddDataToDatabase(picturePath, returnResult);
-                QueryData();
-            }
         }
         else if( requestCode == CAMERA_REQUEST){
             System.out.println("complete");
             String url = "http://35.244.112.203:5000/spiders";
-            SendMessageToServer(url, imageUri);
+            String returnResult = SendMessageToServer(url, imageUri);
         }
     }
 
 
-    private String SendMessageToServer(String url, String picturePath) {
-
-        OkHttpClient client = new OkHttpClient();
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        try {
-            // Read BitMap by file path.
-            Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        }catch(Exception e){
-            Log.d("Image", "Image path error");
-        }
-        byte[] byteArray = stream.toByteArray();
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("image", "testimage.jpg",
-                        RequestBody.create(MEDIA_TYPE_JPG, byteArray))
-                .build();
-
-        Request request = new Request.Builder().url(url).post(requestBody).build();
-
-        Call call = client.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("Server", "Server connection failure");
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.d("Server", "Server return failure");
-                }
-                else{
-                    res = response.body().string();
-                    Log.d("Server", res);
-                }
-
-            }
-        });
-
-        return res;
-
-    }
-
-    private void SendMessageToServer(String url, Uri imageUri) {
+    private String SendMessageToServer(String url, Uri imageUri) {
 
         OkHttpClient client = new OkHttpClient();
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -257,9 +191,8 @@ public class main_fragment extends Fragment {
             Bitmap bitmap = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
 
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        }catch(Exception e){
+        } catch (Exception e) {
             Log.d("Image", "Image path error");
-            return;
         }
 
         byte[] byteArray = stream.toByteArray();
@@ -282,55 +215,16 @@ public class main_fragment extends Fragment {
             public void onResponse(Call call, final Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d("Server", "Server return failure");
-                }
-                else{
-                    final String res = response.body().string();
+                } else {
+                    res = response.body().string();
                     Log.d("Server", res);
                 }
 
             }
         });
 
-    }
+        return res;
 
-    public void AddDataToDatabase(String picturePath, String res){
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-
-        Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-        String datetime = df.format(c);
-
-        // Compose the first record of database
-        values.put("category", res);
-        values.put("time", datetime);
-        values.put("image", picturePath);
-        histories.add(new History(res, datetime, picturePath));
-        // Insert the first row of database
-        db.insert("History", null, values);
-    }
-
-    public void QueryData(){
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        // Query all the data from "History"
-        Cursor cursor = db.query("History", null, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do {
-                // Get all the record from cursor
-                String category = cursor.getString(cursor.getColumnIndex("category"));
-                String time = cursor.getString(cursor.getColumnIndex("time"));
-                String image = cursor.getString(cursor.getColumnIndex("image"));
-                Log.d("MainActivity", "History category is " + category);
-                Log.d("MainActivity", "History time is " + time);
-                Log.d("MainActivity", "History image is " + image);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-    }
-
-    public void DeleteData(){
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete("History", "category = ?", new String[] { "Spider1" });
     }
 
 
