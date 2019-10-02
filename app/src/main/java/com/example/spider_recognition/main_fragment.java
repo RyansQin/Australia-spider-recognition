@@ -74,6 +74,7 @@ public class main_fragment extends Fragment {
     private MyDatabaseHelper dbHelper;
     private String res = "null";
     private ListView history_view;
+    private ArrayList<History> histories = new ArrayList<>();
 
     public main_fragment() {
         // Required empty public constructor
@@ -155,9 +156,9 @@ public class main_fragment extends Fragment {
         }
         if (this.default_fragment == R.layout.me_fragment){
             history_view = view.findViewById(R.id.history_view);
-            if (QueryData() != null){
+            if (histories.size() > 1){
                 Log.d("history", "not null");
-                HistoryAdapter historyAdapter = new HistoryAdapter(getActivity(), R.layout.history_list, QueryData());
+                HistoryAdapter historyAdapter = new HistoryAdapter(getActivity(), R.layout.history_list, histories);
                 history_view.setAdapter(historyAdapter);
             }
             else{
@@ -304,13 +305,13 @@ public class main_fragment extends Fragment {
         values.put("category", res);
         values.put("time", datetime);
         values.put("image", picturePath);
+        histories.add(new History(res, datetime, picturePath));
         // Insert the first row of database
         db.insert("History", null, values);
     }
 
-    public ArrayList<History> QueryData(){
+    public void QueryData(){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ArrayList<History> histories = new ArrayList<>();
         // Query all the data from "History"
         Cursor cursor = db.query("History", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
@@ -319,15 +320,12 @@ public class main_fragment extends Fragment {
                 String category = cursor.getString(cursor.getColumnIndex("category"));
                 String time = cursor.getString(cursor.getColumnIndex("time"));
                 String image = cursor.getString(cursor.getColumnIndex("image"));
-                histories.add(new History(category, time, image));
                 Log.d("MainActivity", "History category is " + category);
                 Log.d("MainActivity", "History time is " + time);
                 Log.d("MainActivity", "History image is " + image);
             } while (cursor.moveToNext());
         }
         cursor.close();
-
-        return histories;
     }
 
     public void DeleteData(){
