@@ -3,11 +3,15 @@ package com.example.spider_recognition;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,11 +27,16 @@ import android.widget.TextView;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -59,6 +68,12 @@ public class main_fragment extends Fragment {
     private static int GALLERY_UPLOAD = 1;
     private String[] galleryPermissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
+    private Uri imageUri;
+    private final int CAMERA_REQUEST = 2;
+//    database helper
+    private MyDatabaseHelper dbHelper;
+    private String res = "null";
+    private ListView history_view;
 
     public main_fragment() {
         // Required empty public constructor
@@ -69,6 +84,8 @@ public class main_fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        dbHelper = new MyDatabaseHelper(getActivity(), "SpiderHistory.db", null, 2);
+        dbHelper.getWritableDatabase();
         if (this.getArguments() != null)
             this.default_fragment = getArguments().getInt(fragment_type);
 
@@ -116,6 +133,36 @@ public class main_fragment extends Fragment {
                     startActivityForResult(intent, GALLERY_UPLOAD);
                 }
             });
+
+            camerabtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    File image = new File(getActivity().getExternalCacheDir(), "spider_image.jpg");
+                    try{
+                        if (image.exists()) {
+                            image.delete();
+                            image.createNewFile();
+                        }
+                    }catch(IOException e){
+                        e.printStackTrace();
+                    }
+                    imageUri = FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".fileprovider", image);
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                    startActivityForResult(intent, CAMERA_REQUEST);
+                }
+            });
+        }
+        if (this.default_fragment == R.layout.me_fragment){
+            history_view = view.findViewById(R.id.history_view);
+            if (QueryData() != null){
+                Log.d("history", "not null");
+                HistoryAdapter historyAdapter = new HistoryAdapter(getActivity(), R.layout.history_list, QueryData());
+                history_view.setAdapter(historyAdapter);
+            }
+            else{
+                Log.d("history", "null");
+            }
         }
     }
 
@@ -130,12 +177,27 @@ public class main_fragment extends Fragment {
             String picturePath = cursor.getString(columnIndex);
             cursor.close();
             String url = "http://35.244.112.203:5000/spiders";
-            SendMessageToServer(url, picturePath);
+            String returnResult = SendMessageToServer(url, picturePath);
+            if (returnResult == "multiple"){
+                Log.d("ImageDetection", "Multiple objects");
+            }
+            else if (returnResult == "null"){
+                Log.d("ImageDetection", "Server return failure");
+            }
+            else{
+                AddDataToDatabase(picturePath, returnResult);
+                QueryData();
+            }
+        }
+        else if( requestCode == CAMERA_REQUEST){
+            System.out.println("complete");
+            String url = "http://35.244.112.203:5000/spiders";
+            SendMessageToServer(url, imageUri);
         }
     }
 
 
-    private void SendMessageToServer(String url, String picturePath) {
+    private String SendMessageToServer(String url, String picturePath) {
 
         OkHttpClient client = new OkHttpClient();
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -148,8 +210,57 @@ public class main_fragment extends Fragment {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         }catch(Exception e){
             Log.d("Image", "Image path error");
+        }
+        byte[] byteArray = stream.toByteArray();
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("image", "testimage.jpg",
+                        RequestBody.create(MEDIA_TYPE_JPG, byteArray))
+                .build();
+
+        Request request = new Request.Builder().url(url).post(requestBody).build();
+
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d("Server", "Server connection failure");
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.d("Server", "Server return failure");
+                }
+                else{
+                    res = response.body().string();
+                    Log.d("Server", res);
+                }
+
+            }
+        });
+
+        return res;
+
+    }
+
+    private void SendMessageToServer(String url, Uri imageUri) {
+
+        OkHttpClient client = new OkHttpClient();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        try {
+            // Read BitMap by file path.
+            Bitmap bitmap = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        }catch(Exception e){
+            Log.d("Image", "Image path error");
             return;
         }
+
         byte[] byteArray = stream.toByteArray();
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -181,7 +292,48 @@ public class main_fragment extends Fragment {
 
     }
 
+    public void AddDataToDatabase(String picturePath, String res){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
 
+        Date c = Calendar.getInstance().getTime();
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        String datetime = df.format(c);
+
+        // Compose the first record of database
+        values.put("category", res);
+        values.put("time", datetime);
+        values.put("image", picturePath);
+        // Insert the first row of database
+        db.insert("History", null, values);
+    }
+
+    public ArrayList<History> QueryData(){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ArrayList<History> histories = new ArrayList<>();
+        // Query all the data from "History"
+        Cursor cursor = db.query("History", null, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                // Get all the record from cursor
+                String category = cursor.getString(cursor.getColumnIndex("category"));
+                String time = cursor.getString(cursor.getColumnIndex("time"));
+                String image = cursor.getString(cursor.getColumnIndex("image"));
+                histories.add(new History(category, time, image));
+                Log.d("MainActivity", "History category is " + category);
+                Log.d("MainActivity", "History time is " + time);
+                Log.d("MainActivity", "History image is " + image);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        return histories;
+    }
+
+    public void DeleteData(){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete("History", "category = ?", new String[] { "Spider1" });
+    }
 
 
     private ArrayList<spider>getSpiders(){

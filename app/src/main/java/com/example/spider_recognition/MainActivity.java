@@ -28,8 +28,6 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class MainActivity extends AppCompatActivity {
 
     //create the bottom menu, bind the fragment
-    private static int GALLERY_UPLOAD = 1;
-
     private BottomNavigationView.OnNavigationItemSelectedListener btmNavigationSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
