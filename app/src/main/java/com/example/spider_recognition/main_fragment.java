@@ -1,9 +1,14 @@
 package com.example.spider_recognition;
 
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,14 +17,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.provider.MediaStore;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import okhttp3.Call;
@@ -30,6 +39,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -46,6 +56,8 @@ public class main_fragment extends Fragment {
     private Button camerabtn;
     private Button gallerybtn;
     private static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
+    private static int GALLERY_UPLOAD = 1;
+    private String[] galleryPermissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
 
     public main_fragment() {
@@ -100,14 +112,30 @@ public class main_fragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Log.d("ButtonClick", "button click");
-                    String url = "http://35.244.112.203:5000/spiders";
-                    SendMessageToServer(url);
+                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    startActivityForResult(intent, GALLERY_UPLOAD);
                 }
             });
         }
     }
 
-    private void SendMessageToServer(String url) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GALLERY_UPLOAD && null != data){
+            Uri selectedImg = data.getData();
+            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+            Cursor cursor = getActivity().getContentResolver().query(selectedImg, filePathColumn, null, null, null);
+            cursor.moveToFirst();
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String picturePath = cursor.getString(columnIndex);
+            cursor.close();
+            String url = "http://35.244.112.203:5000/spiders";
+            SendMessageToServer(url, picturePath);
+        }
+    }
+
+
+    private void SendMessageToServer(String url, String picturePath) {
 
         OkHttpClient client = new OkHttpClient();
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -116,7 +144,7 @@ public class main_fragment extends Fragment {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try {
             // Read BitMap by file path.
-            Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.garden_orb_weaver_spider);
+            Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         }catch(Exception e){
             Log.d("Image", "Image path error");
@@ -125,8 +153,7 @@ public class main_fragment extends Fragment {
         byte[] byteArray = stream.toByteArray();
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-//                .addFormDataPart("user", "helloworld")
-                .addFormDataPart("image", "redtest.jpg",
+                .addFormDataPart("image", "testimage.jpg",
                         RequestBody.create(MEDIA_TYPE_JPG, byteArray))
                 .build();
 
