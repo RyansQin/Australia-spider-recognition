@@ -11,7 +11,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="name_redback">Redback spider</string>
     <string name="redback_info">The redback spider, also known as the Australian black widow is a species of highly venomous spider believed to originate in the South Australian or adjacent Western Australian deserts, but now found throughout Australia, Southeast Asia and New Zealand, with colonies elsewhere outside Australia.</string>
-    <string name="redback_hazard_level"><Data><![CDATA[Hazard level:<font color="#EE0000">Deadly</font>]]></Data></string>
+    <string name="redback_hazard_level"><font color='blue'>Deadly</font></string>
     <string name="daddy_long_legs_name">Daddy long legs spider</string>
     <string name="name_garden_orb">Garden orb spider</string>
     <string name="name_huntsman">Huntsman spider</string>
@@ -22,24 +22,24 @@
     <string name="name_recluse">Recluse spider</string>
     <string name="name_redhead">Red headed spider</string>
     <string name="garden_orb_info">The Australian garden orb weaver spider is a very common species of spider with many variants in size, shape, and colour across the coastal regions of the eastern states of Australia. They have very large abdomens when well-fed and exhibit a tremendous colour-range from off-white through tan, brown to almost black.</string>
-    <string name="garden_orb_level"><Data><![CDATA[Hazard level:<font color="#EE0000">Low risk/Non toxic</font>]]></Data></string>
+    <string name="garden_orb_level">Low risk/Non toxic</string>
     <string name="huntsman_info">Huntsman spiders, members of the family Sparassidae, are known by this name because of their speed and mode of hunting. They also are called giant crab spiders because of their size and appearance. Larger species sometimes are referred to as wood spiders, because of their preference for woody places.</string>
-    <string name="huntsman_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Low risk/Non toxic</font>]]></Data></string>
+    <string name="huntsman_level">Low risk/Non toxic</string>
     <string name="funnel_web_info">Atracidae is a family of mygalomorph spiders, commonly known as Australian funnel-web spiders or atracids. It has been included as a subfamily of the Hexathelidae, but is now recognized as a separate family. All members of the family are native to Australia.</string>
-    <string name="funnel_web_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Deadly</font>]]></Data></string>
+    <string name="funnel_web_level">Deadly</string>
     <string name="st_andrews_cross_info">Argiope keyserlingi is a common species of orb-web spider found on the east coast of Australia, from central New South Wales to northern Queensland. It is very similar in appearance to the closely related north Queensland species, Argiope aetherea.</string>
-    <string name="st_andrews_cross_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Low risk/Non toxic</font>]]></Data></string>
+    <string name="st_andrews_cross_level">Low risk/Non toxic</string>
     <string name="tarantula_info">Australian tarantulas are also called Whistling spiders, Barking spiders and Bird-eating spiders. Habitat - Adult female Australian tarantulas live in web-lined burrows in the ground of up to 100 cm deep. The male tarantulas often construct silk webbing retreats under rocks or logs.</string>
-    <string name="tarantula_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Low risk/Non toxic</font>]]></Data></string>
+    <string name="tarantula_level">Low risk/Non toxic</string>
     <string name="white_tailed_info">White-tailed spiders are spiders native to southern and eastern Australia, and so named because of the whitish tips at the end of their abdomens. Body size is up to 18 mm, with leg-span of 28 mm. Common species are Lampona cylindrata and Lampona murina. Both these species have been introduced to New Zealand.</string>
-    <string name="white_tailed_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Low risk/Non toxic</font>]]></Data></string>
+    <string name="white_tailed_level">Low risk</string>
     <string name="recluse_info">The brown recluse, Loxosceles reclusa, Sicariidae is a recluse spider with a necrotic venom. Similar to other recluse spider bites, their bite sometimes requires medical attention. The brown recluse is one of three spiders with medically significant venom in North America.</string>
-    <string name="recluse_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Dangerous, not deadly</font>]]></Data></string>
+    <string name="recluse_level">Dangerous, not deadly</string>
     <string name="red_headed_info">Missulena occatoria, known as the red-headed mouse spider, is found in Southern Australia, from open forests to desert shrublands. It is the largest and most widely distributed Missulena species, because the spiderlings are wind-dispersed.</string>
-    <string name="red_headed_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Low risk</font>]]></Data></string>
+    <string name="red_headed_level">Low risk</string>
     <string name="daddy_long_legs_info">Pholcidae, commonly known as cellar spiders, daddy long-legs spider, granddaddy long-legs spider, carpenter spider, daddy long-legger, vibrating spider and skull spider, is a family of araneomorph spiders first described by Ludwig Carl Christian Koch in 1850. It contains over 1800 species divided in 94 genera.</string>
-    <string name="daddy_long_legs_level"><Data><![CDATA[Hazard level: <font color="#EE0000">Low risk</font>]]></Data></string>
-
+    <string name="daddy_long_legs_level">Low risk</string>
+    <string name="Distribution_map">Distribution map</string>
     <string name="image_history">Image uploaded by user</string>
     <string name="identification_history">Identification history</string>
     <string name="uploaded_position">Uploaded position</string>

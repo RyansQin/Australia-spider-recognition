@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="none"
+
+    >
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,43 +18,81 @@
 
     <ImageView
         android:id="@+id/spider_image"
-        android:layout_width="482dp"
+        android:layout_width="fill_parent"
         android:layout_height="309dp"
         android:contentDescription="name"
         android:adjustViewBounds="true"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/garden_orb_weaving_spider_sample" />
 
-    <TextView
-        android:id="@+id/spider_name"
+
+
+    <com.example.spider_recognition.CustomExpandableListView
+        android:id="@+id/lvExp"
+        android:layout_margin="5dp"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="#8BC34A"
-        android:gravity="center_horizontal"
-        android:text="NAME"
-        android:textSize="24sp"
+        android:layout_height="wrap_content" />
+
+
+    <TextView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/shape"
+        android:paddingLeft="45dp"
+        android:textColor="#FFFFFF"
+        android:textSize="17dp"
         android:textStyle="bold" />
 
-    <EditText
-        android:id="@+id/description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:focusable="false"
-        android:ems="10"
-        android:gravity="start|top"
-        android:inputType="textMultiLine"
-        android:text="Description for spider"
-        android:textSize="19sp" />
+    <ImageView
+        android:id="@+id/distribution"
+        android:layout_width="fill_parent"
+        android:layout_marginTop = "20dp"
+        android:layout_height="309dp"
+        android:contentDescription="name"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/garden_orb_weaver_distribution" />
 
-    <EditText
-        android:id="@+id/hazard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:focusable="false"
-        android:ems="10"
-        android:gravity="start|top"
-        android:inputType="textMultiLine"
-        android:text="Risk"
-        android:textSize="21sp" />
+
+
+
+
+<!--    <TextView-->
+<!--        android:id="@+id/spider_name"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:background="#8BC34A"-->
+<!--        android:gravity="center_horizontal"-->
+<!--        android:text="NAME"-->
+<!--        android:textSize="24sp"-->
+<!--        android:textStyle="bold" />-->
+
+<!--    <EditText-->
+<!--        android:id="@+id/description"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:focusable="false"-->
+<!--        android:ems="10"-->
+<!--        android:gravity="start|top"-->
+<!--        android:inputType="textMultiLine"-->
+<!--        android:text="Description for spider"-->
+<!--        android:textSize="19sp" />-->
+
+<!--    <EditText-->
+<!--        android:id="@+id/hazard"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:focusable="false"-->
+<!--        android:ems="10"-->
+<!--        android:gravity="start|top"-->
+<!--        android:inputType="textMultiLine"-->
+<!--        android:text="Risk"-->
+<!--        android:textSize="21sp" />-->
+
 
 </LinearLayout>
+
+</ScrollView>

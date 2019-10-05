@@ -2,18 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/spider_man"
+    android:orientation="vertical"
     tools:context=".main_fragment">
 
     <Button
         android:id="@+id/btnCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="80dp"
+        android:layout_marginLeft="110dp"
         android:layout_marginTop="350dp"
-        android:layout_marginRight="80dp"
+        android:layout_marginRight="110dp"
+        android:background="@drawable/shape_spiderman"
         android:text="@string/strCamera"
         android:textSize="18sp" />
 
@@ -21,9 +23,10 @@
         android:id="@+id/btnGallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="80dp"
+        android:layout_marginLeft="110dp"
         android:layout_marginTop="50dp"
-        android:layout_marginRight="80dp"
+        android:layout_marginRight="110dp"
+        android:background="@drawable/shape_spiderman"
         android:text="@string/strGallery"
         android:textSize="18sp" />
 
