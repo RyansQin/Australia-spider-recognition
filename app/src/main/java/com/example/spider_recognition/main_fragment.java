@@ -64,15 +64,14 @@ public class main_fragment extends Fragment {
     private ListView listView;
     private Button camerabtn;
     private Button gallerybtn;
-    private static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
     private static int GALLERY_UPLOAD = 1;
     private String[] galleryPermissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private Uri imageUri;
     private final int CAMERA_REQUEST = 2;
-    private String res = "null";
     private ListView history_view;
     private ArrayList<History> histories = new ArrayList<>();
+    private String res;
 
     public main_fragment() {
         // Required empty public constructor
@@ -156,76 +155,18 @@ public class main_fragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_UPLOAD && null != data){
             Uri selectedImg = data.getData();
-//            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-//            Cursor cursor = getActivity().getContentResolver().query(selectedImg, filePathColumn, null, null, null);
-//            cursor.moveToFirst();
-//            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-//            String picturePath = cursor.getString(columnIndex);
-//            cursor.close();
-            String url = "http://35.244.112.203:5000/spiders";
-            String returnResult = SendMessageToServer(url, selectedImg);
-            if (returnResult == "multiple"){
-                Log.d("ImageDetection", "Multiple objects");
-            }
-            else if (returnResult == "null"){
-                Log.d("ImageDetection", "Server return failure");
-            }
+            Intent intent = new Intent(getActivity(),SpiderDetection.class);
+            intent.putExtra("uri", selectedImg.toString());
+            startActivity(intent);
         }
         else if( requestCode == CAMERA_REQUEST){
             System.out.println("complete");
-            String url = "http://35.244.112.203:5000/spiders";
-            String returnResult = SendMessageToServer(url, imageUri);
+            Intent intent = new Intent(getActivity(),SpiderDetection.class);
+            intent.putExtra("uri", imageUri.toString());
+            startActivity(intent);
         }
     }
 
-
-    private String SendMessageToServer(String url, Uri imageUri) {
-
-        OkHttpClient client = new OkHttpClient();
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        try {
-            // Read BitMap by file path.
-            Bitmap bitmap = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
-
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        } catch (Exception e) {
-            Log.d("Image", "Image path error");
-        }
-
-        byte[] byteArray = stream.toByteArray();
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("image", "testimage.jpg",
-                        RequestBody.create(MEDIA_TYPE_JPG, byteArray))
-                .build();
-
-        Request request = new Request.Builder().url(url).post(requestBody).build();
-
-        Call call = client.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("Server", "Server connection failure");
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.d("Server", "Server return failure");
-                } else {
-                    res = response.body().string();
-                    Log.d("Server", res);
-                }
-
-            }
-        });
-
-        return res;
-
-    }
 
 
     private ArrayList<spider>getSpiders(){

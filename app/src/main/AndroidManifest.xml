@@ -26,6 +26,7 @@
                 android:resource="@xml/provider_path" />
         </provider>
         <activity android:name=".encyclopedia_spider"></activity>
+        <activity android:name=".SpiderDetection"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
