@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "234900151912",
+    "firebase_url": "https://computing-projects-75251.firebaseio.com",
+    "project_id": "computing-projects-75251",
+    "storage_bucket": "computing-projects-75251.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234900151912:android:e39cb67139f9fd00e1a5dd",
+        "android_client_info": {
+          "package_name": "com.example.spider_recognition"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "234900151912-v5lnftp80dvokcnge2qk6sokja5k54gj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVmU_LxwpidgfbBHE_g5HoywHEOSJjGpo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "234900151912-v5lnftp80dvokcnge2qk6sokja5k54gj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
