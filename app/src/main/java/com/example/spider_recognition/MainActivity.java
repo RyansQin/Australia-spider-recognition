@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 case R.id.personal_menu:{
-                    Fragment me = main_fragment.newInstance(main_fragment.me_fragment);
+                    Fragment me = main_fragment.newInstance(main_fragment.map_fragment);
                     getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.current_fragment, me)

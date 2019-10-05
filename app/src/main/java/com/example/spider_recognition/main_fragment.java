@@ -30,6 +30,11 @@ import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +45,7 @@ import java.util.Date;
 import java.util.List;
 
 import butterknife.ButterKnife;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -58,21 +64,25 @@ public class main_fragment extends Fragment {
     public static int enryclopedia_fragment = R.layout.enryclopedia_fragment;
     public static int identifier_fragment = R.layout.identifier_fragment;
     public static int me_fragment = R.layout.me_fragment;
+    public static int map_fragment = R.layout.map_fragment;
 
     public static String fragment_type = "type";
     private int default_fragment = R.layout.identifier_fragment;
     private ListView listView;
     private Button camerabtn;
     private Button gallerybtn;
-    private static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
     private static int GALLERY_UPLOAD = 1;
     private String[] galleryPermissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private Uri imageUri;
     private final int CAMERA_REQUEST = 2;
-    private String res = "null";
     private ListView history_view;
     private ArrayList<History> histories = new ArrayList<>();
+    private String res;
+
+    // for map_fragment
+    private MapView mapView;
+    private GoogleMap appMap;
 
     public main_fragment() {
         // Required empty public constructor
@@ -88,7 +98,7 @@ public class main_fragment extends Fragment {
 
         View view = inflater.inflate(default_fragment, container, false);
         ButterKnife.bind(this, view);
-        initializeList(view);
+        initializeList(view, savedInstanceState);
 
         return view;
     }
@@ -101,7 +111,7 @@ public class main_fragment extends Fragment {
         return fragment;
     }
 
-    private void initializeList(View view){
+    private void initializeList(View view, Bundle savedInstanceState){
         if (this.default_fragment == R.layout.enryclopedia_fragment){
             spiderAdapter adapter = new spiderAdapter(getActivity(), R.layout.listview_example, getSpiders());
             listView = view.findViewById(R.id.encyclopedia_view);
@@ -119,7 +129,7 @@ public class main_fragment extends Fragment {
                 }
             });
         }
-        if (this.default_fragment == R.layout.identifier_fragment) {
+        else if (this.default_fragment == R.layout.identifier_fragment) {
             camerabtn = view.findViewById(R.id.btnCamera);
             gallerybtn = view.findViewById(R.id.btnGallery);
             gallerybtn.setOnClickListener(new View.OnClickListener() {
@@ -150,82 +160,66 @@ public class main_fragment extends Fragment {
                 }
             });
         }
+        else if (this.default_fragment == R.layout.map_fragment){
+            // if user is in map page
+            mapView = view.findViewById(R.id.mapView);
+            mapView.onCreate(savedInstanceState);
+            mapView.onResume();
+            try{
+                MapsInitializer.initialize(getActivity().getApplicationContext());
+
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            mapView.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    appMap = googleMap;
+//                    appMap.setMyLocationEnabled(true);
+                }
+            });
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_UPLOAD && null != data){
             Uri selectedImg = data.getData();
-//            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-//            Cursor cursor = getActivity().getContentResolver().query(selectedImg, filePathColumn, null, null, null);
-//            cursor.moveToFirst();
-//            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-//            String picturePath = cursor.getString(columnIndex);
-//            cursor.close();
-            String url = "http://35.244.112.203:5000/spiders";
-            String returnResult = SendMessageToServer(url, selectedImg);
-            if (returnResult == "multiple"){
-                Log.d("ImageDetection", "Multiple objects");
-            }
-            else if (returnResult == "null"){
-                Log.d("ImageDetection", "Server return failure");
-            }
+            Intent intent = new Intent(getActivity(),SpiderDetection.class);
+            intent.putExtra("uri", selectedImg.toString());
+            startActivity(intent);
         }
         else if( requestCode == CAMERA_REQUEST){
             System.out.println("complete");
-            String url = "http://35.244.112.203:5000/spiders";
-            String returnResult = SendMessageToServer(url, imageUri);
+            Intent intent = new Intent(getActivity(),SpiderDetection.class);
+            intent.putExtra("uri", imageUri.toString());
+            startActivity(intent);
         }
     }
 
 
-    private String SendMessageToServer(String url, Uri imageUri) {
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        mapView.onResume();
+//    }
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        mapView.onPause();
+//    }
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        mapView.onDestroy();
+//    }
+//    @Override
+//    public void onLowMemory() {
+//        super.onLowMemory();
+//        mapView.onLowMemory();
+//    }
 
-        OkHttpClient client = new OkHttpClient();
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        try {
-            // Read BitMap by file path.
-            Bitmap bitmap = BitmapFactory.decodeStream(getActivity().getContentResolver().openInputStream(imageUri));
-
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        } catch (Exception e) {
-            Log.d("Image", "Image path error");
-        }
-
-        byte[] byteArray = stream.toByteArray();
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("image", "testimage.jpg",
-                        RequestBody.create(MEDIA_TYPE_JPG, byteArray))
-                .build();
-
-        Request request = new Request.Builder().url(url).post(requestBody).build();
-
-        Call call = client.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("Server", "Server connection failure");
-            }
-
-            @Override
-            public void onResponse(Call call, final Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.d("Server", "Server return failure");
-                } else {
-                    res = response.body().string();
-                    Log.d("Server", res);
-                }
-
-            }
-        });
-
-        return res;
-
-    }
 
 
     private ArrayList<spider>getSpiders(){
