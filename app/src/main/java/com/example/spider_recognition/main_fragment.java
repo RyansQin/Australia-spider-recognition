@@ -30,6 +30,11 @@ import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +45,7 @@ import java.util.Date;
 import java.util.List;
 
 import butterknife.ButterKnife;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -58,6 +64,7 @@ public class main_fragment extends Fragment {
     public static int enryclopedia_fragment = R.layout.enryclopedia_fragment;
     public static int identifier_fragment = R.layout.identifier_fragment;
     public static int me_fragment = R.layout.me_fragment;
+    public static int map_fragment = R.layout.map_fragment;
 
     public static String fragment_type = "type";
     private int default_fragment = R.layout.identifier_fragment;
@@ -73,6 +80,10 @@ public class main_fragment extends Fragment {
     private ArrayList<History> histories = new ArrayList<>();
     private String res;
 
+    // for map_fragment
+    private MapView mapView;
+    private GoogleMap appMap;
+
     public main_fragment() {
         // Required empty public constructor
     }
@@ -87,7 +98,7 @@ public class main_fragment extends Fragment {
 
         View view = inflater.inflate(default_fragment, container, false);
         ButterKnife.bind(this, view);
-        initializeList(view);
+        initializeList(view, savedInstanceState);
 
         return view;
     }
@@ -100,7 +111,7 @@ public class main_fragment extends Fragment {
         return fragment;
     }
 
-    private void initializeList(View view){
+    private void initializeList(View view, Bundle savedInstanceState){
         if (this.default_fragment == R.layout.enryclopedia_fragment){
             spiderAdapter adapter = new spiderAdapter(getActivity(), R.layout.listview_example, getSpiders());
             listView = view.findViewById(R.id.encyclopedia_view);
@@ -118,7 +129,7 @@ public class main_fragment extends Fragment {
                 }
             });
         }
-        if (this.default_fragment == R.layout.identifier_fragment) {
+        else if (this.default_fragment == R.layout.identifier_fragment) {
             camerabtn = view.findViewById(R.id.btnCamera);
             gallerybtn = view.findViewById(R.id.btnGallery);
             gallerybtn.setOnClickListener(new View.OnClickListener() {
@@ -149,6 +160,26 @@ public class main_fragment extends Fragment {
                 }
             });
         }
+        else if (this.default_fragment == R.layout.map_fragment){
+            // if user is in map page
+            mapView = view.findViewById(R.id.mapView);
+            mapView.onCreate(savedInstanceState);
+            mapView.onResume();
+            try{
+                MapsInitializer.initialize(getActivity().getApplicationContext());
+
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            mapView.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    appMap = googleMap;
+//                    appMap.setMyLocationEnabled(true);
+                }
+            });
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -166,6 +197,28 @@ public class main_fragment extends Fragment {
             startActivity(intent);
         }
     }
+
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        mapView.onResume();
+//    }
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        mapView.onPause();
+//    }
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        mapView.onDestroy();
+//    }
+//    @Override
+//    public void onLowMemory() {
+//        super.onLowMemory();
+//        mapView.onLowMemory();
+//    }
 
 
 
