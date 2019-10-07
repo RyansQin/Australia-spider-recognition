@@ -2,59 +2,45 @@ package com.example.spider_recognition;
 
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.provider.MediaStore;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.ButterKnife;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -83,6 +69,9 @@ public class main_fragment extends Fragment {
     // for map_fragment
     private MapView mapView;
     private GoogleMap appMap;
+    private LocationManager locationManager;
+    private String provider;
+    private LatLng myLocation;
 
     public main_fragment() {
         // Required empty public constructor
@@ -99,6 +88,23 @@ public class main_fragment extends Fragment {
         View view = inflater.inflate(default_fragment, container, false);
         ButterKnife.bind(this, view);
         initializeList(view, savedInstanceState);
+
+        locationManager=(LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        List<String> list=locationManager.getProviders(true);
+        if(list.contains(LocationManager.GPS_PROVIDER)){
+            provider=LocationManager.GPS_PROVIDER;
+        }
+        else if(list.contains(LocationManager.NETWORK_PROVIDER)){
+            provider=LocationManager.NETWORK_PROVIDER;
+        }
+        try {
+            Location location=locationManager.getLastKnownLocation(provider);
+            myLocation=new LatLng(location.getLatitude(),location.getLongitude());
+        }catch(SecurityException e){
+            Toast.makeText(getActivity(),"please allow the GPS permission",Toast.LENGTH_LONG).show();
+        }catch (NullPointerException e){
+            Toast.makeText(getActivity(),"please allow the GPS permission", Toast.LENGTH_LONG).show();
+        }
 
         return view;
     }
@@ -167,7 +173,7 @@ public class main_fragment extends Fragment {
             mapView.onResume();
             try{
                 MapsInitializer.initialize(getActivity().getApplicationContext());
-
+                initialiser();
             }
             catch(Exception e){
                 e.printStackTrace();
@@ -176,7 +182,8 @@ public class main_fragment extends Fragment {
                 @Override
                 public void onMapReady(GoogleMap googleMap) {
                     appMap = googleMap;
-//                    appMap.setMyLocationEnabled(true);
+                    appMap.moveCamera(CameraUpdateFactory.zoomTo(16));
+                    appMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
                 }
             });
         }
@@ -198,29 +205,35 @@ public class main_fragment extends Fragment {
         }
     }
 
+    public void initialiser (){
+        if (!Places.isInitialized()) {
+            Places.initialize(getActivity().getApplicationContext(), "AIzaSyBtbw67hiHLGAhYsXmuXZmcPtO4hc2ehdU");
+        }
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        mapView.onResume();
-//    }
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        mapView.onPause();
-//    }
-//    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        mapView.onDestroy();
-//    }
-//    @Override
-//    public void onLowMemory() {
-//        super.onLowMemory();
-//        mapView.onLowMemory();
-//    }
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
 
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+                Log.i("google map", "Place: " + place.getName() + ", " + place.getId());
+                appMap.moveCamera(CameraUpdateFactory.zoomTo(16));
+                appMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+                appMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Marker in Sydney"));
+            }
 
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("google map", "An error occurred: " + status);
+            }
+        });
+    }
 
     private ArrayList<spider>getSpiders(){
         ArrayList<spider> spiders = new ArrayList<>();
