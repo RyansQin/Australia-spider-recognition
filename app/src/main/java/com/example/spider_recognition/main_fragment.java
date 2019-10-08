@@ -2,7 +2,9 @@ package com.example.spider_recognition;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
@@ -18,6 +20,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -27,18 +30,31 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 
@@ -72,6 +88,11 @@ public class main_fragment extends Fragment {
     private LocationManager locationManager;
     private String provider;
     private LatLng myLocation;
+    public static HashMap<String, LatLng> spider_places= new HashMap<>();
+    private String[] spider_categories = new String[]{"Australian Redback Spider", "Australian Tarantula Spider",
+            "Daddy Long Legs Spider", "Garden Orb Weaver Spider", "Australian Huntsman Spider", "Red Headed Mouse Spider",
+            "St Andrews Cross Spider", "Sydney Funnel Web Spider", "White Tailed Spider", "Recluse Spider"};
+    private int index;
 
     public main_fragment() {
         // Required empty public constructor
@@ -182,8 +203,29 @@ public class main_fragment extends Fragment {
                 @Override
                 public void onMapReady(GoogleMap googleMap) {
                     appMap = googleMap;
-                    appMap.moveCamera(CameraUpdateFactory.zoomTo(16));
-                    appMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    CollectionReference spider_collections = db.collection("places");
+                    spider_collections.get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()){
+                                        for(QueryDocumentSnapshot document : task.getResult()){
+                                            spider_places.put((String)document.get("Category"),new LatLng((double) document.get("Latitude"), (double) document.get("Longitude")));
+                                        }
+                                        for (String place : spider_places.keySet()) {
+                                            appMap.addMarker(new MarkerOptions()
+                                                    .position(spider_places.get(place))
+                                                    .title(place)
+                                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                                            );
+                                            Log.d("Spider", place);
+                                        }
+                                        appMap.moveCamera(CameraUpdateFactory.zoomTo(16));
+                                        appMap.moveCamera(CameraUpdateFactory.newLatLng(spider_places.get(myLocation)));
+                                    }
+                                }
+                            });
                 }
             });
         }
@@ -224,7 +266,57 @@ public class main_fragment extends Fragment {
                 Log.i("google map", "Place: " + place.getName() + ", " + place.getId());
                 appMap.moveCamera(CameraUpdateFactory.zoomTo(16));
                 appMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
-                appMap.addMarker(new MarkerOptions().position(place.getLatLng()).title("Marker in Sydney"));
+                appMap.addMarker(new MarkerOptions().position(place.getLatLng()));
+                String spider_category;
+                appMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Message");
+                        builder.setMessage("Would you like to add it to the spider map?");
+                        builder.setCancelable(true);
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Log.d("alert", "Yes click");
+                                AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
+                                builder1.setTitle("Please select the spider type:");
+                                builder1.setSingleChoiceItems(spider_categories, 0, new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // TODO Auto-generated method stub
+                                        index = which;
+                                        Log.d("choice", spider_categories[which]);
+                                    }
+                                });
+                                builder1.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        uploadToFirebase(spider_categories[index], place.getLatLng());
+                                    }
+                                });
+                                builder1.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        dialogInterface.cancel();
+                                    }
+                                });
+                                AlertDialog alert1 = builder1.create();
+                                alert1.show();
+                            }
+                        });
+                        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.cancel();
+                            }
+                        });
+                        AlertDialog alert = builder.create();
+                        alert.show();
+                        return true;
+                    }
+                });
             }
 
             @Override
@@ -233,6 +325,29 @@ public class main_fragment extends Fragment {
                 Log.i("google map", "An error occurred: " + status);
             }
         });
+    }
+
+    private void uploadToFirebase (String category, LatLng loca){
+        Map<String, Object> spiderPlaces = new HashMap<>();
+        spiderPlaces.put("Category",category);
+        spiderPlaces.put("Latitude",loca.latitude);
+        spiderPlaces.put("Longitude",loca.longitude);
+        FirebaseFirestore db= FirebaseFirestore.getInstance();
+        CollectionReference spider_collections = db.collection("places");
+        spider_collections.add(spiderPlaces)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("firebase", "add successfully");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("firebase","add error");
+                    }
+                });
+
     }
 
     private ArrayList<spider>getSpiders(){
