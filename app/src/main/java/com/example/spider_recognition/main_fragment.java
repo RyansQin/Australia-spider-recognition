@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -58,6 +59,8 @@ import java.util.Map;
 
 import butterknife.ButterKnife;
 
+import static androidx.core.content.PermissionChecker.checkSelfPermission;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -88,7 +91,7 @@ public class main_fragment extends Fragment {
     private LocationManager locationManager;
     private String provider;
     private LatLng myLocation;
-    public static HashMap<String, LatLng> spider_places= new HashMap<>();
+    public static HashMap<String, LatLng> spider_places = new HashMap<>();
     private String[] spider_categories = new String[]{"Australian Redback Spider", "Australian Tarantula Spider",
             "Daddy Long Legs Spider", "Garden Orb Weaver Spider", "Australian Huntsman Spider", "Red Headed Mouse Spider",
             "St Andrews Cross Spider", "Sydney Funnel Web Spider", "White Tailed Spider", "Recluse Spider"};
@@ -110,27 +113,10 @@ public class main_fragment extends Fragment {
         ButterKnife.bind(this, view);
         initializeList(view, savedInstanceState);
 
-        locationManager=(LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-        List<String> list=locationManager.getProviders(true);
-        if(list.contains(LocationManager.GPS_PROVIDER)){
-            provider=LocationManager.GPS_PROVIDER;
-        }
-        else if(list.contains(LocationManager.NETWORK_PROVIDER)){
-            provider=LocationManager.NETWORK_PROVIDER;
-        }
-        try {
-            Location location=locationManager.getLastKnownLocation(provider);
-            myLocation=new LatLng(location.getLatitude(),location.getLongitude());
-        }catch(SecurityException e){
-            Toast.makeText(getActivity(),"please allow the GPS permission",Toast.LENGTH_LONG).show();
-        }catch (NullPointerException e){
-            Toast.makeText(getActivity(),"please allow the GPS permission", Toast.LENGTH_LONG).show();
-        }
-
         return view;
     }
 
-    static Fragment newInstance(int option){
+    static Fragment newInstance(int option) {
         Fragment fragment = new main_fragment();
         Bundle bundle = new Bundle();
         bundle.putInt(fragment_type, option);
@@ -138,8 +124,8 @@ public class main_fragment extends Fragment {
         return fragment;
     }
 
-    private void initializeList(View view, Bundle savedInstanceState){
-        if (this.default_fragment == R.layout.enryclopedia_fragment){
+    private void initializeList(View view, Bundle savedInstanceState) {
+        if (this.default_fragment == R.layout.enryclopedia_fragment) {
             spiderAdapter adapter = new spiderAdapter(getActivity(), R.layout.listview_example, getSpiders());
             listView = view.findViewById(R.id.encyclopedia_view);
             listView.setAdapter(adapter);
@@ -147,16 +133,15 @@ public class main_fragment extends Fragment {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    spider au_spider = (spider)adapterView.getItemAtPosition(i);
+                    spider au_spider = (spider) adapterView.getItemAtPosition(i);
                     String type = au_spider.getSpider_name();
-                    Intent intent = new Intent(getActivity(),encyclopedia_spider.class);
+                    Intent intent = new Intent(getActivity(), encyclopedia_spider.class);
                     intent.putExtra("Type", type);
                     startActivity(intent);
 
                 }
             });
-        }
-        else if (this.default_fragment == R.layout.identifier_fragment) {
+        } else if (this.default_fragment == R.layout.identifier_fragment) {
             camerabtn = view.findViewById(R.id.btnCamera);
             gallerybtn = view.findViewById(R.id.btnGallery);
             gallerybtn.setOnClickListener(new View.OnClickListener() {
@@ -172,12 +157,12 @@ public class main_fragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     File image = new File(getActivity().getExternalCacheDir(), "spider_image.jpg");
-                    try{
+                    try {
                         if (image.exists()) {
                             image.delete();
                             image.createNewFile();
                         }
-                    }catch(IOException e){
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                     imageUri = FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".fileprovider", image);
@@ -186,23 +171,48 @@ public class main_fragment extends Fragment {
                     startActivityForResult(intent, CAMERA_REQUEST);
                 }
             });
-        }
-        else if (this.default_fragment == R.layout.map_fragment){
+        } else if (this.default_fragment == R.layout.map_fragment) {
             // if user is in map page
             mapView = view.findViewById(R.id.mapView);
             mapView.onCreate(savedInstanceState);
             mapView.onResume();
-            try{
+            try {
                 MapsInitializer.initialize(getActivity().getApplicationContext());
                 initialiser();
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             mapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
                 public void onMapReady(GoogleMap googleMap) {
                     appMap = googleMap;
+                    if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            && checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    Activity#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for Activity#requestPermissions for more details.
+                        return;
+                    }
+                    appMap.setMyLocationEnabled(true);
+                    locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+                    List<String> list = locationManager.getProviders(true);
+                    if (list.contains(LocationManager.GPS_PROVIDER)) {
+                        provider = LocationManager.GPS_PROVIDER;
+                    } else if (list.contains(LocationManager.NETWORK_PROVIDER)) {
+                        provider = LocationManager.NETWORK_PROVIDER;
+                    }
+                    try {
+                        Location location = locationManager.getLastKnownLocation(provider);
+                        myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    } catch (SecurityException e) {
+                        Log.d("google", "map error1");
+                    } catch (NullPointerException e) {
+                        Log.d("google", "map error2");
+                    }
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     CollectionReference spider_collections = db.collection("places");
                     spider_collections.get()
@@ -222,7 +232,7 @@ public class main_fragment extends Fragment {
                                             Log.d("Spider", place);
                                         }
                                         appMap.moveCamera(CameraUpdateFactory.zoomTo(16));
-                                        appMap.moveCamera(CameraUpdateFactory.newLatLng(spider_places.get(myLocation)));
+                                        appMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
                                     }
                                 }
                             });
