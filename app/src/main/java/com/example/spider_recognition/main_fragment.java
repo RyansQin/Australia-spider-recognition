@@ -236,6 +236,63 @@ public class main_fragment extends Fragment {
                                     }
                                 }
                             });
+                    appMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                        @Override
+                        public void onMapClick(LatLng latLng) {
+                            Log.d("Map", "map click");
+                            appMap.addMarker(new MarkerOptions().position(latLng));
+                            String spider_category;
+                            appMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                @Override
+                                public boolean onMarkerClick(Marker marker) {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                    builder.setTitle("Message");
+                                    builder.setMessage("Would you like to add it to the spider map?");
+                                    builder.setCancelable(true);
+                                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            Log.d("alert", "Yes click");
+                                            AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
+                                            builder1.setTitle("Please select the spider type:");
+                                            builder1.setSingleChoiceItems(spider_categories, 0, new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    // TODO Auto-generated method stub
+                                                    index = which;
+                                                    Log.d("choice", spider_categories[which]);
+                                                }
+                                            });
+                                            builder1.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    uploadToFirebase(spider_categories[index], latLng);
+                                                }
+                                            });
+                                            builder1.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    dialogInterface.cancel();
+                                                }
+                                            });
+                                            AlertDialog alert1 = builder1.create();
+                                            alert1.show();
+                                        }
+                                    });
+                                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            dialogInterface.cancel();
+                                        }
+                                    });
+                                    AlertDialog alert = builder.create();
+                                    alert.show();
+                                    return true;
+                                }
+                            });
+                        }
+                    });
                 }
             });
         }
@@ -348,7 +405,19 @@ public class main_fragment extends Fragment {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+
                         Log.d("firebase", "add successfully");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Successful");
+                        builder.setMessage("Wow, you have successfully added to the spider map!");
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+                        AlertDialog alert = builder.create();
+                        alert.show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
