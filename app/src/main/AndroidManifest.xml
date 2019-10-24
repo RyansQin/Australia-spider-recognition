@@ -34,15 +34,16 @@
         </provider>
 
 
-        <activity android:name=".encyclopedia_spider"></activity>
-        <activity android:name=".SpiderDetection"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".encyclopedia_spider"></activity>
+        <activity android:name=".SpiderDetection"></activity>
+        <activity android:name=".MainActivity"></activity>
 
 
     </application>

@@ -3,7 +3,12 @@
     android:shape="rectangle">
 
     <!-- 填充的颜色 -->
-    <solid android:color="#C0C0C0"/>
+    <solid android:color="#34495E"/>
+    <gradient
+        android:startColor="#27AE60"
+        android:endColor="#1F618D"
+        android:angle="45"
+        />
     <!-- 设置按钮的四个角为弧形 -->
     <!-- android:radius 弧形的半径 -->
     <corners android:radius="360dip"/>

@@ -4,19 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/spider_man"
+    android:background="@drawable/zhujiemian"
     android:orientation="vertical"
     tools:context=".main_fragment">
+
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="164dp"
+        android:layout_marginTop="75dp"
+        android:src="@drawable/spider_zhujiemian" />
 
     <Button
         android:id="@+id/btnCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="110dp"
-        android:layout_marginTop="350dp"
+        android:layout_marginTop="150dp"
         android:layout_marginRight="110dp"
         android:background="@drawable/shape_spiderman"
         android:text="@string/strCamera"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:textSize="18sp" />
 
     <Button
@@ -28,6 +37,7 @@
         android:layout_marginRight="110dp"
         android:background="@drawable/shape_spiderman"
         android:text="@string/strGallery"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:textSize="18sp" />
 
     <ImageView
