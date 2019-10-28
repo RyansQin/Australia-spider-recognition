@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,13 +61,18 @@ public class SpiderDetection extends AppCompatActivity {
             e.printStackTrace();
             Log.d("Image", "image not found");
         }
-        //            String url = "http://35.244.112.203:5000/spiders";
-        String url = "http://192.168.101.87:5000/spiders";
+        String url = "http://35.244.112.203:5000/spiders";
+//        String url = "http://192.168.101.87:5000/spiders";
         SendMessageToServer(url, uri);
     }
 
     private void SendMessageToServer(String url, Uri imageUri) {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.RGB_565;
 
@@ -93,6 +99,7 @@ public class SpiderDetection extends AppCompatActivity {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                detection_result.setText("Server connection failure");
                 Log.d("Server", "Server connection failure");
             }
 
